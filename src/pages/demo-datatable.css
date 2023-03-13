@@ -1,0 +1,13 @@
+.products-list {
+    text-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.product-card {
+    border: 2px solid rgb(143, 143, 143);
+    box-shadow: 2px 2px;
+    border-radius: 5px;
+    padding: 0 5px
+}
