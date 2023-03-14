@@ -39,11 +39,6 @@ const DemoDataTable = () => {
             header: () => <b>Category</b>,
             cell: (info) => info.getValue().toUpperCase(),
             enableSorting: true,
-            sortingFn: (a, b) => (a.original.category.name > b.original.category.name ? -1 : 1),
-        }),
-        columnHelper.accessor("createdBy.name", {
-            header: () => <b>Created By</b>,
-            cell: (info) => info.getValue(),
         }),
         columnHelper.accessor("createdAt", {
             header: () => <b>Created At</b>,
@@ -55,14 +50,23 @@ const DemoDataTable = () => {
             header: () => <b>Price</b>,
             cell: (info) => `$ ${info.getValue()}`,
         }),
-        columnHelper.accessor("description", {
-            header: () => <b>Description</b>,
-            cell: (info) => (info.getValue() ? info.getValue() : "No description."),
-        }),
+
         columnHelper.display({
             id: "actions",
             header: "Actions",
             cell: (props) => <button onClick={() => console.log(props.row.original)}>Edit</button>,
+        }),
+    ];
+
+    const fullColumns = [
+        ...columns,
+        columnHelper.accessor("createdBy.name", {
+            header: () => <b>Created By</b>,
+            cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor("description", {
+            header: () => <b>Description</b>,
+            cell: (info) => (info.getValue() ? info.getValue() : "No description."),
         }),
     ];
 
@@ -79,7 +83,7 @@ const DemoDataTable = () => {
     }, []);
 
     const tableInstance = useReactTable<Product>({
-        columns,
+        columns: mediaInfo.isDesktop ? fullColumns : columns,
         data: products,
         state: {
             sorting,
@@ -107,9 +111,6 @@ const DemoDataTable = () => {
                                         <th key={header.id}>
                                             <div
                                                 {...{
-                                                    className: header.column.getCanSort()
-                                                        ? "cursor-pointer select-none"
-                                                        : "",
                                                     onClick: header.column.getToggleSortingHandler(),
                                                 }}
                                             >
@@ -141,7 +142,7 @@ const DemoDataTable = () => {
                             ))}
                         </tbody>
                     </table>
-                    <div className="flex items-center gap-2">
+                    <div>
                         <button
                             onClick={() => tableInstance.setPageIndex(0)}
                             disabled={!tableInstance.getCanPreviousPage()}
@@ -196,25 +197,29 @@ const DemoDataTable = () => {
                 </div>
             )}
 
-            {mediaInfo.isMobile && (
-                <div className="products-list">
-                    {products.map((product) => (
-                        <div className="product-card" key={product._id}>
-                            <div>Title: {product.title}</div>
-                            <div>Category: {product.category.name}</div>
-                            <div>Created by{product.createdBy.name}</div>
-                            <div>Created at:{new Date(product.createdAt).toLocaleDateString()}</div>
-                            <div>Price: {product.price}</div>
-                            <div>Description: {product.description ? product.description : "None."}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {mediaInfo.isMobile && mobileListRender(products)}
         </>
     );
 };
 
-function Filter({ column, table }: { column: Column<any, unknown>; table: Table<any> }) {
+const mobileListRender = (products: Product[]) => {
+    return (
+        <div className="products-list">
+            {products.map((product) => (
+                <div className="product-card" key={product._id}>
+                    <div>Title: {product.title}</div>
+                    <div>Category: {product.category.name}</div>
+                    <div>Created by: {product.createdBy.name}</div>
+                    <div>Created at: {new Date(product.createdAt).toLocaleDateString()}</div>
+                    <div>Price: {product.price}</div>
+                    <div>Description: {product.description ? product.description : "None."}</div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const Filter = ({ column, table }: { column: Column<any, unknown>; table: Table<any> }) => {
     const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
 
     const columnFilterValue = column.getFilterValue();
@@ -265,19 +270,19 @@ function Filter({ column, table }: { column: Column<any, unknown>; table: Table<
             />
         </>
     );
-}
+};
 
 // A debounced input react component
-function DebouncedInput({
+const DebouncedInput = ({
     value: initialValue,
     onChange,
-    debounce = 500,
+    debounce = 1000,
     ...props
 }: {
     value: string | number;
     onChange: (value: string | number) => void;
     debounce?: number;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) => {
     const [value, setValue] = useState(initialValue);
 
     useEffect(() => {
@@ -293,6 +298,6 @@ function DebouncedInput({
     }, [value]);
 
     return <input {...props} value={value} onChange={(e) => setValue(e.target.value)} />;
-}
+};
 
 export default DemoDataTable;
