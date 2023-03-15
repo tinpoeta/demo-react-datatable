@@ -6,7 +6,7 @@ import { MediaInfoContext } from "./contexts/MediaInfo";
 const App = () => {
   const useDesktopMediaQuery = () => useMediaQuery({ minWidth: 1280 });
 
-  const useTabletMediaQuery = () => useMediaQuery({ minWidth: 768, maxWidth: 1280 });
+  const useTabletMediaQuery = () => useMediaQuery({ minWidth: 768, maxWidth: 1279 });
 
   const useMobileMediaQuery = () => useMediaQuery({ maxWidth: 767 });
 

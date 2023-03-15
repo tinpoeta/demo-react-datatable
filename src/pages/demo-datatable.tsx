@@ -33,12 +33,12 @@ const DemoDataTable = () => {
         }),
         columnHelper.accessor("title", {
             header: () => <b>Title</b>,
-            cell: (info) => info.getValue(),
+            cell: (info) => info.row.original.title + " - " + info.row.original.category.name,
         }),
         columnHelper.accessor("category.name", {
             header: () => <b>Category</b>,
             cell: (info) => info.getValue().toUpperCase(),
-            enableSorting: true,
+            enableSorting: false,
         }),
         columnHelper.accessor("createdAt", {
             header: () => <b>Created At</b>,
@@ -50,7 +50,6 @@ const DemoDataTable = () => {
             header: () => <b>Price</b>,
             cell: (info) => `$ ${info.getValue()}`,
         }),
-
         columnHelper.display({
             id: "actions",
             header: "Actions",
@@ -70,6 +69,25 @@ const DemoDataTable = () => {
         }),
     ];
 
+    const mobileColumns = [
+        columnHelper.display({
+            id: "mobileTable",
+            header: "Table",
+            cell: (product) => (
+                <div className="product-card" key={product.row.original._id}>
+                    <div>Title: {product.row.original.title}</div>
+                    <div>Category: {product.row.original.category.name}</div>
+                    <div>Created by: {product.row.original.createdBy.name}</div>
+                    <div>Created at: {new Date(product.row.original.createdAt).toLocaleDateString()}</div>
+                    <div>Price: {product.row.original.price}</div>
+                    <div>
+                        Description: {product.row.original.description ? product.row.original.description : "None."}
+                    </div>
+                </div>
+            ),
+        }),
+    ];
+
     useEffect(() => {
         fetch("https://api.storerestapi.com/products")
             .then((response) => response.json())
@@ -83,7 +101,7 @@ const DemoDataTable = () => {
     }, []);
 
     const tableInstance = useReactTable<Product>({
-        columns: mediaInfo.isDesktop ? fullColumns : columns,
+        columns: mediaInfo.isDesktop ? fullColumns : mediaInfo.isMobile ? mobileColumns : columns,
         data: products,
         state: {
             sorting,
@@ -101,8 +119,8 @@ const DemoDataTable = () => {
 
     return (
         <>
-            {(mediaInfo.isDesktop || mediaInfo.isTablet) && (
-                <div>
+            {
+                <div className={mediaInfo.isMobile ? "products-list" : ""}>
                     <table>
                         <thead>
                             {getHeaderGroups().map((headerGroup) => (
@@ -195,29 +213,12 @@ const DemoDataTable = () => {
                         </select>
                     </div>
                 </div>
-            )}
-
-            {mediaInfo.isMobile && mobileListRender(products)}
+            }
         </>
     );
 };
 
-const mobileListRender = (products: Product[]) => {
-    return (
-        <div className="products-list">
-            {products.map((product) => (
-                <div className="product-card" key={product._id}>
-                    <div>Title: {product.title}</div>
-                    <div>Category: {product.category.name}</div>
-                    <div>Created by: {product.createdBy.name}</div>
-                    <div>Created at: {new Date(product.createdAt).toLocaleDateString()}</div>
-                    <div>Price: {product.price}</div>
-                    <div>Description: {product.description ? product.description : "None."}</div>
-                </div>
-            ))}
-        </div>
-    );
-};
+
 
 const Filter = ({ column, table }: { column: Column<any, unknown>; table: Table<any> }) => {
     const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
