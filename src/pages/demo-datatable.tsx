@@ -117,49 +117,50 @@ const DemoDataTable = () => {
 
     const { getHeaderGroups, getRowModel } = tableInstance;
 
+    const tableCells = getRowModel().rows.map((row) => (
+        <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+            ))}
+        </tr>
+    ));
+
     return (
         <>
             {
                 <div className={mediaInfo.isMobile ? "products-list" : ""}>
-                    <table>
-                        <thead>
-                            {getHeaderGroups().map((headerGroup) => (
-                                <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <th key={header.id}>
-                                            <div
-                                                {...{
-                                                    onClick: header.column.getToggleSortingHandler(),
-                                                }}
-                                            >
-                                                {flexRender(header.column.columnDef.header, header.getContext())}
-                                                {{
-                                                    asc: "🔼",
-                                                    desc: "🔽",
-                                                }[header.column.getIsSorted() as string] ?? null}
-                                            </div>
-                                            {header.column.getCanFilter() ? (
-                                                <div>
-                                                    <Filter column={header.column} table={tableInstance} />
+                    {!mediaInfo.isMobile && (
+                        <table>
+                            <thead>
+                                {getHeaderGroups().map((headerGroup) => (
+                                    <tr key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <th key={header.id}>
+                                                <div
+                                                    {...{
+                                                        onClick: header.column.getToggleSortingHandler(),
+                                                    }}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {{
+                                                        asc: "🔼",
+                                                        desc: "🔽",
+                                                    }[header.column.getIsSorted() as string] ?? null}
                                                 </div>
-                                            ) : null}
-                                        </th>
-                                    ))}
-                                </tr>
-                            ))}
-                        </thead>
-                        <tbody>
-                            {getRowModel().rows.map((row) => (
-                                <tr key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                {header.column.getCanFilter() ? (
+                                                    <div>
+                                                        <Filter column={header.column} table={tableInstance} />
+                                                    </div>
+                                                ) : null}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </thead>
+                            <tbody>{tableCells}</tbody>
+                        </table>
+                    )}
+                    {mediaInfo.isMobile && <div>{tableCells}</div>}
                     <div>
                         <button
                             onClick={() => tableInstance.setPageIndex(0)}
@@ -182,14 +183,14 @@ const DemoDataTable = () => {
                         >
                             {">>"}
                         </button>
-                        <span>
-                            <div>Page</div>
+                        <span className=" flex flex-auto justify-center">
+                            <div>Page &nbsp;</div>
                             <strong>
                                 {tableInstance.getState().pagination.pageIndex + 1} of {tableInstance.getPageCount()}
                             </strong>
                         </span>
                         <span>
-                            | Go to page:
+                            Go to page: &nbsp;
                             <input
                                 type="number"
                                 defaultValue={tableInstance.getState().pagination.pageIndex + 1}
@@ -197,6 +198,7 @@ const DemoDataTable = () => {
                                     const page = e.target.value ? Number(e.target.value) - 1 : 0;
                                     tableInstance.setPageIndex(page);
                                 }}
+                                className="w-10 text-center border-b-2 border-solid mr-2 border-black"
                             />
                         </span>
                         <select
@@ -217,8 +219,6 @@ const DemoDataTable = () => {
         </>
     );
 };
-
-
 
 const Filter = ({ column, table }: { column: Column<any, unknown>; table: Table<any> }) => {
     const firstValue = table.getPreFilteredRowModel().flatRows[0]?.getValue(column.id);
@@ -298,7 +298,14 @@ const DebouncedInput = ({
         return () => clearTimeout(timeout);
     }, [value]);
 
-    return <input {...props} value={value} onChange={(e) => setValue(e.target.value)} />;
+    return (
+        <input
+            className="font-normal text-sm border-b border-solid w-full placeholder:text-center "
+            {...props}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+        />
+    );
 };
 
 export default DemoDataTable;

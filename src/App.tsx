@@ -1,4 +1,5 @@
 import "./App.css";
+import "./index.css";
 import DemoDataTable from "./pages/demo-datatable";
 import { useMediaQuery } from "react-responsive";
 import { MediaInfoContext } from "./contexts/MediaInfo";
